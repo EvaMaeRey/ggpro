@@ -41,7 +41,7 @@ library(tidyverse)
 ## basic example code
 
 
-
+#' @export
 scale_x_vbar <- function(drop = F, wrap = 15, labels = function(x){stringr::str_wrap(x, wrap)}, ...){
   
     scale_x_discrete(drop = drop, 
@@ -49,14 +49,14 @@ scale_x_vbar <- function(drop = F, wrap = 15, labels = function(x){stringr::str_
   
 }    
 
-  
+#' @export
 scale_y_vbar <- function(expand = expansion(c(0, .1)), yaxis_title = "", labels = function(x){ifelse(x == max(x, na.rm = T), paste0("\n", x, "\n", yaxis_title), x)}, ...){
  
   scale_y_continuous(expand = expand, labels = labels, ...)
    
 }
 
-
+#' @export
 theme_vbar <- function(){
   
   theme(axis.line.x = element_blank(),
@@ -70,7 +70,7 @@ theme_vbar <- function(){
   
 }
 
-
+#' @export
 geom_vbar <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
   
   list(geom_bar(...),
@@ -82,6 +82,7 @@ geom_vbar <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
   
 }
 
+#' @export
 geom_vbar_label <- function(...){
   
   
@@ -98,7 +99,7 @@ diamonds |>
   ggplot() + 
   aes(x = cut) + 
   geom_vbar() + 
-  geom_vbar_label()
+  geom_vbar_label() 
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
@@ -107,12 +108,13 @@ diamonds |>
 
 ggchalkboard:::theme_blackboard() |> theme_set()
 
-last_plot()
+last_plot() 
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
 
 ``` r
+  
 
 last_plot() + 
   scale_y_vbar(yaxis_title = "diamonds", limits = c(0, nrow(diamonds)))
@@ -131,3 +133,11 @@ last_plot() +
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-4.png" width="100%" />
+
+``` r
+knitrExtra::chunk_to_dir("geom_vbar")
+usethis::use_package("stringr")
+usethis::use_package("ggplot2")
+devtools::check(".")
+devtools::install(".", upgrade = "never")
+```
