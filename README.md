@@ -42,7 +42,7 @@ library(tidyverse)
 
 
 
-scale_x_bar_v <- function(drop = F, wrap = 15, labels = function(x){stringr::str_wrap(x, wrap)}, ...){
+scale_x_vbar <- function(drop = F, wrap = 15, labels = function(x){stringr::str_wrap(x, wrap)}, ...){
   
     scale_x_discrete(drop = drop, 
                      labels = labels)
@@ -50,14 +50,14 @@ scale_x_bar_v <- function(drop = F, wrap = 15, labels = function(x){stringr::str
 }    
 
   
-scale_y_bar_v <- function(expand = expansion(c(0, .1)), yaxis_title = "", labels = function(x){ifelse(x == max(x, na.rm = T), paste0("\n", x, "\n", yaxis_title), x)}, ...){
+scale_y_vbar <- function(expand = expansion(c(0, .1)), yaxis_title = "", labels = function(x){ifelse(x == max(x, na.rm = T), paste0("\n", x, "\n", yaxis_title), x)}, ...){
  
   scale_y_continuous(expand = expand, labels = labels, ...)
    
 }
 
 
-theme_bar_v <- function(){
+theme_vbar <- function(){
   
   theme(axis.line.x = element_blank(),
              panel.grid.major.x = element_blank(),
@@ -66,24 +66,23 @@ theme_bar_v <- function(){
              panel.grid.major.y = element_line(),
              axis.title = element_blank(),
              axis.ticks = element_blank(),
-             panel.background = element_blank(),
              axis.line.x.bottom = element_line())
   
 }
 
 
-geom_bar_v <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
+geom_vbar <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
   
   list(geom_bar(...),
-       theme_bar_v(),
-       scale_x_bar_v(wrap = wrap),
-       scale_y_bar_v(yaxis_title = yaxis_title),
+       theme_vbar(),
+       scale_x_vbar(wrap = wrap),
+       scale_y_vbar(yaxis_title = yaxis_title),
        NULL
        )
   
 }
 
-geom_bar_v_label <- function(...){
+geom_vbar_label <- function(...){
   
   
   statexpress::qlayer(geom = statexpress::qproto_update(GeomLabel,
@@ -95,24 +94,40 @@ geom_bar_v_label <- function(...){
 ```
 
 ``` r
-ggchalkboard:::theme_slateboard() |> theme_set()
-
 diamonds |> 
   ggplot() + 
   aes(x = cut) + 
-  geom_bar_v() + 
-  geom_bar_v_label()
+  geom_vbar() + 
+  geom_vbar_label()
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 ``` r
 
+ggchalkboard:::theme_blackboard() |> theme_set()
+
+last_plot()
+```
+
+<img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
+
+``` r
 
 last_plot() + 
-  scale_y_bar_v(yaxis_title = "diamonds")
+  scale_y_vbar(yaxis_title = "diamonds", limits = c(0, nrow(diamonds)))
 #> Scale for y is already present.
 #> Adding another scale for y, which will replace the existing scale.
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" />
+
+``` r
+
+last_plot() + 
+  scale_x_vbar(wrap = 6)
+#> Scale for x is already present.
+#> Adding another scale for x, which will replace the existing scale.
+```
+
+<img src="man/figures/README-unnamed-chunk-3-4.png" width="100%" />
