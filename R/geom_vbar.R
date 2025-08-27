@@ -24,7 +24,7 @@ theme_vbar <- function(){
              panel.grid.major.x = element_blank(),
              panel.grid.minor.x = element_blank(),
              panel.grid.minor.y = element_blank(),
-             panel.grid.major.y = element_line(),
+             panel.grid.major.y = element_line(linewidth = .1),
              axis.title = element_blank(),
              axis.ticks = element_blank(),
              axis.line.x.bottom = element_line())
@@ -43,16 +43,22 @@ geom_vbar <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
   
 }
 
+
+
+
 #' @export
 geom_vbar_label <- function(...){
   
   
   statexpress::qlayer(geom = statexpress::qproto_update(GeomLabel,
                                                         aes(vjust = 0, linewidth = 0, fill = NA)),
-                      stat = statexpress::qproto_update(StatCount, aes(label = after_stat(count)))
-                                                )
+                      stat = statexpress::qproto_update(StatCount, aes(label = after_stat(count))), 
+                      ...                          )
   
 }
+
+
+
 
 
 

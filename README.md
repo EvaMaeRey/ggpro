@@ -13,6 +13,12 @@ The goal of ggpro is to …
 You can install the development version of ggpro from
 [GitHub](https://github.com/) with:
 
+‘You provide the data, tell ggplot2 how to map variables to aesthetics,
+what graphical primitives to use, and it takes care of the details.’
+
+But getting to a professional looking plot might involve many details -
+and might vary depending on what chart type you are after.
+
 ``` r
 # install.packages("devtools")
 devtools::install_github("EvaMaeRey/ggpro")
@@ -27,7 +33,7 @@ library(tidyverse)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.1.4          ✔ readr     2.1.5     
 #> ✔ forcats   1.0.0          ✔ stringr   1.5.1     
-#> ✔ ggplot2   3.5.1.9000     ✔ tibble    3.2.1     
+#> ✔ ggplot2   3.5.2.9002     ✔ tibble    3.2.1     
 #> ✔ lubridate 1.9.3          ✔ tidyr     1.3.1     
 #> ✔ purrr     1.0.2          
 #> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
@@ -63,7 +69,7 @@ theme_vbar <- function(){
              panel.grid.major.x = element_blank(),
              panel.grid.minor.x = element_blank(),
              panel.grid.minor.y = element_blank(),
-             panel.grid.major.y = element_line(),
+             panel.grid.major.y = element_line(linewidth = .1),
              axis.title = element_blank(),
              axis.ticks = element_blank(),
              axis.line.x.bottom = element_line())
@@ -82,19 +88,27 @@ geom_vbar <- function(yaxis = T, wrap = 15, yaxis_title = "", ...){
   
 }
 
+
+
+
 #' @export
 geom_vbar_label <- function(...){
   
   
   statexpress::qlayer(geom = statexpress::qproto_update(GeomLabel,
                                                         aes(vjust = 0, linewidth = 0, fill = NA)),
-                      stat = statexpress::qproto_update(StatCount, aes(label = after_stat(count)))
-                                                )
+                      stat = statexpress::qproto_update(StatCount, aes(label = after_stat(count))), 
+                      ...                          )
   
 }
 ```
 
 ``` r
+
+theme_grey() |> 
+  theme_set()
+
+
 diamonds |> 
   ggplot() + 
   aes(x = cut) + 
@@ -106,9 +120,10 @@ diamonds |>
 
 ``` r
 
-ggchalkboard:::theme_blackboard() |> theme_set()
+ggchalkboard:::theme_blackboard() |> 
+  theme_set()
 
-last_plot() 
+last_plot()
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
@@ -135,9 +150,218 @@ last_plot() +
 <img src="man/figures/README-unnamed-chunk-3-4.png" width="100%" />
 
 ``` r
-knitrExtra::chunk_to_dir("geom_vbar")
+# library(ggpro)
+## basic example code
+
+
+#' @export
+scale_y_hbar <- function(drop = F, wrap = 15, labels = function(x){stringr::str_wrap(x, wrap)}, ...){
+  
+    scale_y_discrete(drop = drop, 
+                     labels = labels)
+  
+}    
+
+#' @export
+scale_x_hbar <- function(expand = expansion(c(0, .2)), xaxis_title = "", labels = function(x){ifelse(x == max(x, na.rm = T), paste0(x, "\n", xaxis_title), x)}, ...){
+ 
+  scale_x_continuous(expand = expand, labels = labels, ...)
+   
+}
+
+#' @export
+theme_hbar <- function(){
+  
+  theme(axis.line.y = element_blank(),
+             panel.grid.major.y = element_blank(),
+             panel.grid.minor.y = element_blank(),
+             panel.grid.minor.x = element_blank(),
+             panel.grid.major.x = element_line(linewidth = .1),
+             axis.title = element_blank(),
+             axis.ticks = element_blank(),
+             axis.line.y.left = element_line())
+  
+}
+
+#' @export
+geom_hbar <- function(xaxis = T, wrap = 15, xaxis_title = "", ...){
+  
+  list(geom_bar(...),
+       theme_hbar(),
+       scale_y_hbar(wrap = wrap),
+       scale_x_hbar(xaxis_title = xaxis_title),
+       NULL
+       )
+  
+}
+
+
+
+
+#' @export
+geom_hbar_label <- function(...){
+  
+  
+  statexpress::qlayer(geom = statexpress::qproto_update(GeomLabel,
+                                                        aes(hjust = 0, linewidth = 0, fill = NA)),
+                      stat = statexpress::qproto_update(StatCount, aes(label = after_stat(count))), ...
+                                                )
+  
+}
+```
+
+``` r
+diamonds |> 
+  ggplot() + 
+  aes(y = cut) + 
+  geom_hbar() + 
+  geom_hbar_label() 
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+``` r
+aes_y_by_x <- function(x, y){
+  
+  aes(x = {{x}}, 
+      y = interaction(rank(-{{x}}), {{y}}, lex.order = T))
+  
+}
+
+scale_y_remove_rank_rev <- function(...){
+  scale_y_discrete(labels = function(x) str_remove(x, "^\\d+?\\."), 
+                 limits = rev, ...)
+}
+```
+
+``` r
+theme_gray() |> theme_set()
+
+gapminder::gapminder |>
+  filter(year %in% c(1967, 2007)) |> 
+  filter(continent == "Americas") |>
+  ggplot() + 
+  aes_y_by_x(x = pop, y = country) +
+  geom_col() + 
+  scale_y_remove_rank_rev() +
+  facet_wrap(facets = vars(year), 
+             scales = "free_y") 
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+
+``` r
+
+library(tidyverse)
+
+gapminder::gapminder |>
+  filter(year %in% c(1967, 2007)) |> 
+  filter(continent == "Americas") |>
+  ggplot() + 
+  aes(x = pop, y = country) 
+```
+
+<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
+
+``` r
+
+last_plot() + 
+  aes(y = !!rlang::quo_get_expr(last_plot()$mapping$x))
+```
+
+<img src="man/figures/README-unnamed-chunk-7-3.png" width="100%" />
+
+``` r
+
+
+re_map_aes_y_by_x <- function() {
+  structure(list(), 
+            class = "re_map_aes_y_by_x")
+}
+
+#' @export
+ggplot_add.re_map_aes_y_by_x <- function(object, plot, object_name) {
+  
+  plot + aes_y_by_x(y = !!rlang::quo_get_expr(plot$mapping$y),
+                    x = !!rlang::quo_get_expr(plot$mapping$x))
+    
+}
+
+
+
+
+gapminder::gapminder |>
+  filter(year %in% c(1967, 2007)) |> 
+  filter(continent == "Americas") |>
+  ggplot() + 
+  aes(x = pop, y = country) +
+  re_map_aes_y_by_x() + 
+  geom_col() + 
+  scale_y_remove_rank_rev() + 
+  facet_wrap(~year, scales = "free_y")
+```
+
+<img src="man/figures/README-unnamed-chunk-7-4.png" width="100%" />
+
+``` r
+
+
+
+  
+geom_col_ranked <- function(...){
+  
+  list(geom_col(...),
+       re_map_aes_y_by_x(),
+       scale_y_remove_rank_rev(),
+       theme(panel.grid.minor.y = element_blank(),
+             panel.grid.major.y = element_blank()),
+       labs(y = NULL))
+  
+}
+
+
+gapminder::gapminder |>
+  filter(year %in% c(1967, 2007)) |> 
+  filter(continent == "Americas") |>
+  mutate(pop_millions = pop/1000000) ->
+americas_pop_2years
+  
+ggplot(americas_pop_2years) + 
+  aes(x = pop_millions, y = country) +
+  geom_col_ranked() +
+  facet_wrap(~year, scales = "free_y")
+```
+
+<img src="man/figures/README-unnamed-chunk-7-5.png" width="100%" />
+
+``` r
+
+
+
+last_plot() + 
+  ggplyr::data_slice_max(pop, n = 5, by = year) + 
+  aes(fill = country == "Argentina") + 
+  # to be scale_fill_logical and grab accent, paper and ink
+  scale_fill_manual(values = c("grey", "slateblue")) + 
+  guides(fill = "none")
+```
+
+<img src="man/figures/README-unnamed-chunk-7-6.png" width="100%" />
+
+``` r
+
+
+last_plot() + 
+  ggchalkboard:::theme_whiteboard()
+```
+
+<img src="man/figures/README-unnamed-chunk-7-7.png" width="100%" />
+
+``` r
+knitrExtra::chunk_to_dir(c("geom_vbar", "geom_hbar"))
 usethis::use_package("stringr")
 usethis::use_package("ggplot2")
+devtools::document()
 devtools::check(".")
 devtools::install(".", upgrade = "never")
 ```
