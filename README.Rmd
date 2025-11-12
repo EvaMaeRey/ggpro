@@ -216,6 +216,43 @@ diamonds |>
 ```
 
 
+
+```{r scale_color_logical}
+#' @export
+scale_color_logical <- function(...){
+  scale_color_manual(values = c(scales::col_mix(theme_get()$geom@ink, 
+                                              theme_get()$geom@paper, .6)
+                                              , scales::col_mix(theme_get()$geom@accent, 
+                                              theme_get()$geom@paper, .1)), guide = "none")}
+
+#' @export
+scale_fill_logical <- function(...){
+  scale_fill_manual(values = c(scales::col_mix(theme_get()$geom@ink, 
+                                              theme_get()$geom@paper, .7)
+                                              , scales::col_mix(theme_get()$geom@accent, 
+                                              theme_get()$geom@paper, .2)), guide = "none")
+                    }
+```
+
+```{r}
+ggplot(mtcars) + 
+  aes(disp, hp, color = cyl == 4) + 
+  geom_jitter(size = 6) + 
+  scale_color_logical()
+
+theme_classic(paper = "whitesmoke", 
+              ink = "gray40", 
+              accent = "plum3") |>
+  set_theme()
+
+ggplot(mtcars) + 
+  aes(cyl, fill = cyl == 8) + 
+  geom_vbar() + 
+  geom_vbar_label(fill = NA) +
+  scale_fill_logical()
+```
+
+
 ```{r, eval = F, echo = F}
 library(tidyverse)
 
@@ -390,28 +427,35 @@ ggplot(americas_pop_2years) +
   facet_wrap(~year, scales = "free_y")
 
 
+theme_grey(accent = "slateblue") |> set_theme()
 
 last_plot() + 
   ggplyr::data_slice_max(pop, n = 5, by = year) + 
   aes(fill = country == "Argentina") + 
-  # to be scale_fill_logical and grab accent, paper and ink
-  scale_fill_manual(values = c("grey", "slateblue")) + 
-  guides(fill = "none")
+  scale_fill_logical() 
 
+
+ggchalkboard:::theme_chalkboard() |> set_theme()
 
 last_plot() + 
-  ggchalkboard:::theme_whiteboard()
+  scale_fill_logical()
   
 
   
 ```
 
+
+
+
+
 ```{r, eval = F}
-knitrExtra::chunk_to_dir(c("geom_vbar", "geom_hbar"))
+knitrExtra::chunk_to_dir(c("geom_vbar", "geom_hbar", "scale_color_logical"))
 usethis::use_package("stringr")
 usethis::use_package("ggplot2")
 devtools::document()
 devtools::check(".")
 devtools::install(".", upgrade = "never")
+
+
 
 ```

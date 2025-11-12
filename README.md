@@ -30,12 +30,13 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(tidyverse)
+#> Warning: package 'ggplot2' was built under R version 4.4.1
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-#> ✔ dplyr     1.1.4          ✔ readr     2.1.5     
-#> ✔ forcats   1.0.0          ✔ stringr   1.5.1     
-#> ✔ ggplot2   3.5.2.9002     ✔ tibble    3.2.1     
-#> ✔ lubridate 1.9.3          ✔ tidyr     1.3.1     
-#> ✔ purrr     1.0.2          
+#> ✔ dplyr     1.1.4     ✔ readr     2.1.5
+#> ✔ forcats   1.0.0     ✔ stringr   1.5.1
+#> ✔ ggplot2   4.0.0     ✔ tibble    3.2.1
+#> ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+#> ✔ purrr     1.0.2     
 #> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
@@ -221,6 +222,48 @@ diamonds |>
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
 ``` r
+#' @export
+scale_color_logical <- function(...){
+  scale_color_manual(values = c(scales::col_mix(theme_get()$geom@ink, 
+                                              theme_get()$geom@paper, .6)
+                                              , scales::col_mix(theme_get()$geom@accent, 
+                                              theme_get()$geom@paper, .1)), guide = "none")}
+
+#' @export
+scale_fill_logical <- function(...){
+  scale_fill_manual(values = c(scales::col_mix(theme_get()$geom@ink, 
+                                              theme_get()$geom@paper, .7)
+                                              , scales::col_mix(theme_get()$geom@accent, 
+                                              theme_get()$geom@paper, .2)), guide = "none")
+                    }
+```
+
+``` r
+ggplot(mtcars) + 
+  aes(disp, hp, color = cyl == 4) + 
+  geom_jitter(size = 6) + 
+  scale_color_logical()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+``` r
+
+theme_classic(paper = "whitesmoke", 
+              ink = "gray40", 
+              accent = "plum3") |>
+  set_theme()
+
+ggplot(mtcars) + 
+  aes(cyl, fill = cyl == 8) + 
+  geom_vbar() + 
+  geom_vbar_label(fill = NA) +
+  scale_fill_logical()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
+
+``` r
 aes_y_by_x <- function(x, y){
   
   aes(x = {{x}}, 
@@ -248,7 +291,7 @@ gapminder::gapminder |>
              scales = "free_y") 
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 ``` r
 
@@ -261,7 +304,7 @@ gapminder::gapminder |>
   aes(x = pop, y = country) 
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
 
 ``` r
 
@@ -269,7 +312,7 @@ last_plot() +
   aes(y = !!rlang::quo_get_expr(last_plot()$mapping$x))
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
 
 ``` r
 
@@ -301,7 +344,7 @@ gapminder::gapminder |>
   facet_wrap(~year, scales = "free_y")
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
 
 ``` r
 
@@ -332,33 +375,36 @@ ggplot(americas_pop_2years) +
   facet_wrap(~year, scales = "free_y")
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-5.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-5.png" width="100%" />
 
 ``` r
 
 
+theme_grey(accent = "slateblue") |> set_theme()
 
 last_plot() + 
   ggplyr::data_slice_max(pop, n = 5, by = year) + 
   aes(fill = country == "Argentina") + 
-  # to be scale_fill_logical and grab accent, paper and ink
-  scale_fill_manual(values = c("grey", "slateblue")) + 
-  guides(fill = "none")
+  scale_fill_logical() 
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-6.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-6.png" width="100%" />
 
 ``` r
 
+
+ggchalkboard:::theme_chalkboard() |> set_theme()
 
 last_plot() + 
-  ggchalkboard:::theme_whiteboard()
+  scale_fill_logical()
+#> Scale for fill is already present.
+#> Adding another scale for fill, which will replace the existing scale.
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-7.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-7.png" width="100%" />
 
 ``` r
-knitrExtra::chunk_to_dir(c("geom_vbar", "geom_hbar"))
+knitrExtra::chunk_to_dir(c("geom_vbar", "geom_hbar", "scale_color_logical"))
 usethis::use_package("stringr")
 usethis::use_package("ggplot2")
 devtools::document()
